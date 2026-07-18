@@ -1,11 +1,19 @@
+import { useState } from "react";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+
 function App() {
+  const [page, setPage] = useState<"login" | "signup">("login");
+
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-slate-900">
-        Banking Dashboard
-      </h1>
+    <div>
+      {page === "login" ? (
+        <Login onSignup={() => setPage("signup")} />
+      ) : (
+        <Signup onLogin={() => setPage("login")} />
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
