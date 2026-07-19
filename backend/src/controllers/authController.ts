@@ -26,11 +26,21 @@ export const registerUser = async (
       });
     }
 
+    // Create user + account together
     const user = await prisma.user.create({
       data: {
         name,
         email,
         password,
+        account: {
+          create: {
+            balance: 0,
+            currency: "INR",
+          },
+        },
+      },
+      include: {
+        account: true,
       },
     });
 
@@ -40,6 +50,10 @@ export const registerUser = async (
         id: user.id,
         name: user.name,
         email: user.email,
+      },
+      account: {
+        balance: user.account?.balance,
+        currency: user.account?.currency,
       },
     });
   } catch (error) {
@@ -69,6 +83,9 @@ export const loginUser = async (
 
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        account: true,
+      },
     });
 
     if (!user || user.password !== password) {
@@ -83,6 +100,10 @@ export const loginUser = async (
         id: user.id,
         name: user.name,
         email: user.email,
+      },
+      account: {
+        balance: user.account?.balance,
+        currency: user.account?.currency,
       },
     });
   } catch (error) {

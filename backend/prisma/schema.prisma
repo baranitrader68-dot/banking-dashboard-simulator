@@ -12,4 +12,26 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
+
+  account   Account?
+}
+
+model Account {
+  id        Int      @id @default(autoincrement())
+  balance   Float    @default(0)
+  currency  String   @default("INR")
+  userId    Int      @unique
+  user      User     @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt DateTime @default(now())
+}
+
+model Transaction {
+  id        Int      @id @default(autoincrement())
+  type      String
+  amount    Float
+  description String
+  accountId Int
+  account   Account  @relation(fields: [accountId], references: [id])
+  createdAt DateTime @default(now())
 }

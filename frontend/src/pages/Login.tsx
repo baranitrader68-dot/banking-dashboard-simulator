@@ -1,6 +1,12 @@
 import { useState } from "react";
 
-function Login({ onSignup }: { onSignup: () => void }) {
+function Login({
+  onSignup,
+  onLoginSuccess,
+}: {
+  onSignup: () => void;
+  onLoginSuccess: () => void;
+}) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -27,6 +33,11 @@ function Login({ onSignup }: { onSignup: () => void }) {
 
       if (response.ok) {
         setMessage("Login successful! 🎉");
+
+        // Dashboard-ku move aagum
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 500);
       } else {
         setMessage(data.message);
       }
