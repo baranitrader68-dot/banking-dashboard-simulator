@@ -1,13 +1,14 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Banking Dashboard Simulator Backend API",
+  "main": "dist/server.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/server.ts"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "start": "ts-node --transpile-only src/server.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "LalaDev",
   "license": "ISC",
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
@@ -18,7 +19,8 @@
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.22.0",
-    "prisma": "^7.8.0"
+    "prisma": "^7.8.0",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
