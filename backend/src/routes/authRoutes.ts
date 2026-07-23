@@ -1,4 +1,4 @@
-import express = require("express");
+import express from "express";
 
 import {
   registerUser,
@@ -7,10 +7,22 @@ import {
 
 const router = express.Router();
 
-// Signup API
-router.post("/signup", registerUser);
+// =========================
+// SIGNUP / REGISTER
+// =========================
 
-// Login API
-router.post("/login", loginUser);
+router.post(
+  "/register",
+  registerUser
+);
+
+// =========================
+// LOGIN
+// =========================
+
+router.post(
+  "/login",
+  loginUser
+);
 
 export default router;

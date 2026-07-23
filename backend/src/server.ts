@@ -1,31 +1,102 @@
-import express = require("express");
-import cors = require("cors");
-import dotenv = require("dotenv");
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
+// Routes
 import authRoutes from "./routes/authRoutes";
 import accountRoutes from "./routes/accountRoutes";
+import cardRoutes from "./routes/cardRoutes";
+import budgetRoutes from "./routes/budgetRoutes";
+import notificationRoutes from "./routes/notificationRoutes";
+import userRoutes from "./routes/userRoutes";
+import adminRoutes from "./routes/adminRoutes";
+import transferRoutes from "./routes/transferRoutes";
 
 dotenv.config();
 
-const app = express();
+const app =
+  express();
+
+// =========================
+// MIDDLEWARE
+// =========================
 
 app.use(cors());
-app.use(express.json());
 
-// Authentication routes
-app.use("/api/auth", authRoutes);
+app.use(
+  express.json()
+);
 
-// Account routes
-app.use("/api/account", accountRoutes);
+// =========================
+// ROUTES
+// =========================
 
-const PORT = process.env.PORT || 5000;
+app.use(
+  "/api/auth",
+  authRoutes
+);
 
-app.get("/", (req, res) => {
-  res.json({
-    message: "Banking Dashboard API is running 🚀",
-  });
-});
+app.use(
+  "/api/account",
+  accountRoutes
+);
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-});
+app.use(
+  "/api/card",
+  cardRoutes
+);
+
+app.use(
+  "/api/budget",
+  budgetRoutes
+);
+
+app.use(
+  "/api/notification",
+  notificationRoutes
+);
+
+app.use(
+  "/api/user",
+  userRoutes
+);
+
+app.use(
+  "/api/admin",
+  adminRoutes
+);
+
+app.use(
+  "/api/transfer",
+  transferRoutes
+);
+
+// =========================
+// TEST ROUTE
+// =========================
+
+app.get(
+  "/",
+  (req, res) => {
+    res.json({
+      message:
+        "Banking Dashboard API is running 🚀",
+    });
+  }
+);
+
+// =========================
+// SERVER
+// =========================
+
+const PORT =
+  5000;
+
+app.listen(
+  PORT,
+  () => {
+    console.log(
+      `Server running on http://localhost:${PORT}`
+    );
+  }
+);

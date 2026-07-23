@@ -13,25 +13,61 @@ model User {
   password  String
   createdAt DateTime @default(now())
 
-  account   Account?
+  account       Account?
+  notifications Notification[]
 }
 
 model Account {
-  id        Int      @id @default(autoincrement())
-  balance   Float    @default(0)
-  currency  String   @default("INR")
-  userId    Int      @unique
-  user      User     @relation(fields: [userId], references: [id])
+  id           Int            @id @default(autoincrement())
+  balance      Float          @default(0)
+  currency     String         @default("INR")
+  userId       Int            @unique
+  user         User           @relation(fields: [userId], references: [id])
   transactions Transaction[]
-  createdAt DateTime @default(now())
+  cards        Card[]
+  budgets      Budget[]
+  createdAt    DateTime       @default(now())
 }
 
 model Transaction {
-  id        Int      @id @default(autoincrement())
-  type      String
-  amount    Float
+  id          Int      @id @default(autoincrement())
+  type        String
+  amount      Float
   description String
+  accountId   Int
+  account     Account  @relation(fields: [accountId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model Card {
+  id         Int      @id @default(autoincrement())
+  cardNumber String   @unique
+  cardHolder String
+  expiryDate String
+  cvv        String
+  status     String   @default("ACTIVE")
+  accountId  Int
+  account    Account  @relation(fields: [accountId], references: [id])
+  createdAt  DateTime @default(now())
+}
+
+model Budget {
+  id        Int      @id @default(autoincrement())
+  category  String
+  amount    Float
+  spent     Float    @default(0)
   accountId Int
   account   Account  @relation(fields: [accountId], references: [id])
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        Int      @id @default(autoincrement())
+  title     String
+  message   String
+  type      String   @default("INFO")
+  isRead    Boolean  @default(false)
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
   createdAt DateTime @default(now())
 }

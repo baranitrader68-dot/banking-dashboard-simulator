@@ -1,14 +1,48 @@
-import express = require("express");
+import express from "express";
 
 import {
   getAccountBalance,
   addMoney,
+  getTransactions,
+  sendMoney,
 } from "../controllers/accountController";
 
 const router = express.Router();
 
-router.get("/:userId", getAccountBalance);
+// =========================
+// GET ACCOUNT BALANCE
+// =========================
 
-router.post("/:userId/add-money", addMoney);
+router.get(
+  "/:userId",
+  getAccountBalance
+);
+
+// =========================
+// ADD MONEY
+// =========================
+
+router.post(
+  "/:userId/add-money",
+  addMoney
+);
+
+// =========================
+// GET TRANSACTIONS
+// =========================
+
+router.get(
+  "/:userId/transactions",
+  getTransactions
+);
+
+// =========================
+// SEND MONEY
+// =========================
+
+router.post(
+  "/:userId/send-money",
+  sendMoney
+);
 
 export default router;
