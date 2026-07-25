@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+const API_URL =
+  "https://banking-dashboard-simulator.onrender.com";
+
 type Transaction = {
   id: number;
   type: string;
@@ -53,16 +56,14 @@ function Dashboard() {
   // =========================
 
   const [balance, setBalance] =
-    useState<number | null>(null);
+    useState<number>(0);
 
   const [currency, setCurrency] =
     useState("INR");
 
-  // Separate amount for Add Money
   const [addMoneyAmount, setAddMoneyAmount] =
     useState("");
 
-  // Separate amount for Send Money
   const [sendMoneyAmount, setSendMoneyAmount] =
     useState("");
 
@@ -115,7 +116,7 @@ function Dashboard() {
   const fetchAccountBalance = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/account/${userId}`,
+        `${API_URL}/api/account/${userId}`,
         {
           headers: authHeaders,
         }
@@ -123,9 +124,25 @@ function Dashboard() {
 
       const data = await response.json();
 
+      console.log(
+        "ACCOUNT API RESPONSE:",
+        data
+      );
+
       if (response.ok) {
-        setBalance(data.balance);
-        setCurrency(data.currency);
+        setBalance(
+          Number(
+            data.balance ??
+              data.account?.balance ??
+              0
+          )
+        );
+
+        setCurrency(
+          data.currency ??
+            data.account?.currency ??
+            "INR"
+        );
       }
     } catch (error) {
       console.error(
@@ -144,7 +161,7 @@ function Dashboard() {
   const fetchTransactions = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/account/${userId}/transactions`,
+        `${API_URL}/api/account/${userId}/transactions`,
         {
           headers: authHeaders,
         }
@@ -165,7 +182,7 @@ function Dashboard() {
               total: number,
               transaction: Transaction
             ) =>
-              total + transaction.amount,
+              total + Number(transaction.amount),
             0
           );
 
@@ -179,7 +196,7 @@ function Dashboard() {
               total: number,
               transaction: Transaction
             ) =>
-              total + transaction.amount,
+              total + Number(transaction.amount),
             0
           );
 
@@ -201,7 +218,7 @@ function Dashboard() {
   const fetchCard = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/card/${userId}`,
+        `${API_URL}/api/card/${userId}`,
         {
           headers: authHeaders,
         }
@@ -227,7 +244,7 @@ function Dashboard() {
   const fetchBudgets = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/budget/${userId}`,
+        `${API_URL}/api/budget/${userId}`,
         {
           headers: authHeaders,
         }
@@ -253,7 +270,7 @@ function Dashboard() {
   const fetchNotifications = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/notification/${userId}`,
+        `${API_URL}/api/notification/${userId}`,
         {
           headers: authHeaders,
         }
@@ -281,7 +298,7 @@ function Dashboard() {
   ) => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/notification/${notificationId}/read`,
+        `${API_URL}/api/notification/${notificationId}/read`,
         {
           method: "PATCH",
           headers: authHeaders,
@@ -344,7 +361,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/account/${userId}/add-money`,
+        `${API_URL}/api/account/${userId}/add-money`,
         {
           method: "POST",
           headers: authHeaders,
@@ -357,7 +374,13 @@ function Dashboard() {
       const data = await response.json();
 
       if (response.ok) {
-        setBalance(data.balance);
+        setBalance(
+          Number(
+            data.balance ??
+              data.account?.balance ??
+              balance + money
+          )
+        );
 
         setAddMoneyAmount("");
 
@@ -365,6 +388,7 @@ function Dashboard() {
           "Money added successfully! 🎉"
         );
 
+        fetchAccountBalance();
         fetchTransactions();
         fetchNotifications();
       } else {
@@ -374,6 +398,8 @@ function Dashboard() {
         );
       }
     } catch (error) {
+      console.error(error);
+
       setMessage(
         "Server connection failed ❌"
       );
@@ -403,7 +429,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/account/${userId}/send-money`,
+        `${API_URL}/api/account/${userId}/send-money`,
         {
           method: "POST",
           headers: authHeaders,
@@ -435,6 +461,8 @@ function Dashboard() {
         );
       }
     } catch (error) {
+      console.error(error);
+
       setMessage(
         "Server connection failed ❌"
       );
@@ -448,7 +476,7 @@ function Dashboard() {
   const handleCreateCard = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/card/${userId}`,
+        `${API_URL}/api/card/${userId}`,
         {
           method: "POST",
           headers: authHeaders,
@@ -458,7 +486,7 @@ function Dashboard() {
       const data = await response.json();
 
       if (response.ok) {
-        setCard(data.card);
+        setCard(data.card ?? data);
 
         setMessage(
           "Virtual card created successfully! 💳🎉"
@@ -472,6 +500,8 @@ function Dashboard() {
         );
       }
     } catch (error) {
+      console.error(error);
+
       setMessage(
         "Server connection failed ❌"
       );
@@ -501,7 +531,7 @@ function Dashboard() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/budget/${userId}`,
+        `${API_URL}/api/budget/${userId}`,
         {
           method: "POST",
           headers: authHeaders,
@@ -532,6 +562,8 @@ function Dashboard() {
         );
       }
     } catch (error) {
+      console.error(error);
+
       setMessage(
         "Server connection failed ❌"
       );
@@ -576,13 +608,11 @@ function Dashboard() {
           </p>
 
           <h2 className="text-3xl font-bold mt-2">
-
             {loading
               ? "Loading..."
-              : `₹${balance?.toLocaleString(
+              : `₹${balance.toLocaleString(
                   "en-IN"
                 )}`}
-
           </h2>
 
           <p className="text-sm text-gray-400 mt-2">
@@ -660,427 +690,4 @@ function Dashboard() {
               </div>
 
               <div>
-                <p className="text-xs text-gray-400">
-                  CVV
-                </p>
-
-                <p className="font-semibold">
-                  {card.cvv}
-                </p>
-              </div>
-
-            </div>
-
-            <p className="mt-6 text-green-400 font-semibold">
-              ● {card.status}
-            </p>
-
-          </div>
-
-        ) : (
-
-          <div className="mt-4">
-
-            <p className="text-gray-600 mb-4">
-              You don't have a virtual card yet.
-            </p>
-
-            <button
-              onClick={handleCreateCard}
-              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
-            >
-              Create Virtual Card 💳
-            </button>
-
-          </div>
-
-        )}
-
-      </div>
-
-      {/* BUDGET */}
-
-      <div className="bg-white p-6 rounded-2xl shadow mt-8">
-
-        <h2 className="text-xl font-bold">
-          Budget Planner 🎯
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-
-          <input
-            type="text"
-            placeholder="Category (Food, Travel...)"
-            value={budgetCategory}
-            onChange={(e) =>
-              setBudgetCategory(
-                e.target.value
-              )
-            }
-            className="border p-3 rounded-lg"
-          />
-
-          <input
-            type="number"
-            placeholder="Budget Amount"
-            value={budgetAmount}
-            onChange={(e) =>
-              setBudgetAmount(
-                e.target.value
-              )
-            }
-            className="border p-3 rounded-lg"
-          />
-
-          <button
-            onClick={handleCreateBudget}
-            className="bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600"
-          >
-            Create Budget 🎯
-          </button>
-
-        </div>
-
-        <div className="mt-6 space-y-4">
-
-          {budgets.length === 0 ? (
-
-            <p className="text-gray-600">
-              No budgets created yet.
-            </p>
-
-          ) : (
-
-            budgets.map((budget) => {
-
-              const percentage =
-                budget.amount > 0
-                  ? (budget.spent /
-                      budget.amount) *
-                    100
-                  : 0;
-
-              return (
-
-                <div
-                  key={budget.id}
-                  className="border p-4 rounded-xl"
-                >
-
-                  <div className="flex justify-between">
-
-                    <p className="font-semibold">
-                      {budget.category}
-                    </p>
-
-                    <p className="font-semibold">
-
-                      ₹
-                      {budget.spent.toLocaleString(
-                        "en-IN"
-                      )}
-
-                      {" / "}
-
-                      ₹
-                      {budget.amount.toLocaleString(
-                        "en-IN"
-                      )}
-
-                    </p>
-
-                  </div>
-
-                  <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
-
-                    <div
-                      className="bg-orange-500 h-3 rounded-full"
-                      style={{
-                        width: `${Math.min(
-                          percentage,
-                          100
-                        )}%`,
-                      }}
-                    />
-
-                  </div>
-
-                  <p className="text-sm text-gray-500 mt-2">
-                    {percentage.toFixed(0)}% used
-                  </p>
-
-                </div>
-
-              );
-            })
-
-          )}
-
-        </div>
-
-      </div>
-
-      {/* NOTIFICATIONS */}
-
-      <div className="bg-white p-6 rounded-2xl shadow mt-8">
-
-        <div className="flex justify-between items-center">
-
-          <h2 className="text-xl font-bold">
-            Notifications 🔔
-          </h2>
-
-          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
-
-            {
-              notifications.filter(
-                (notification) =>
-                  !notification.isRead
-              ).length
-            }{" "}
-
-            Unread
-
-          </span>
-
-        </div>
-
-        {notifications.length === 0 ? (
-
-          <p className="mt-4 text-gray-600">
-            No notifications yet.
-          </p>
-
-        ) : (
-
-          <div className="mt-4 space-y-3">
-
-            {notifications.map(
-              (notification) => (
-
-                <div
-                  key={notification.id}
-                  className={`p-4 rounded-xl border ${
-                    notification.isRead
-                      ? "bg-gray-50"
-                      : "bg-blue-50 border-blue-200"
-                  }`}
-                >
-
-                  <div className="flex justify-between gap-4">
-
-                    <div>
-
-                      <p className="font-semibold">
-                        {notification.title}
-                      </p>
-
-                      <p className="text-gray-600 mt-1">
-                        {notification.message}
-                      </p>
-
-                      <p className="text-sm text-gray-400 mt-2">
-                        {new Date(
-                          notification.createdAt
-                        ).toLocaleString()}
-                      </p>
-
-                    </div>
-
-                    {!notification.isRead && (
-
-                      <button
-                        onClick={() =>
-                          markAsRead(
-                            notification.id
-                          )
-                        }
-                        className="text-sm bg-blue-600 text-white px-3 py-2 rounded-lg h-fit hover:bg-blue-700"
-                      >
-                        Mark as Read
-                      </button>
-
-                    )}
-
-                  </div>
-
-                </div>
-
-              )
-            )}
-
-          </div>
-
-        )}
-
-      </div>
-
-      {/* ADD MONEY */}
-
-      <div className="bg-white p-6 rounded-2xl shadow mt-8">
-
-        <h2 className="text-xl font-bold">
-          Add Money 💰
-        </h2>
-
-        <div className="flex gap-4 mt-4">
-
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={addMoneyAmount}
-            onChange={(e) =>
-              setAddMoneyAmount(
-                e.target.value
-              )
-            }
-            className="border p-3 rounded-lg flex-1"
-          />
-
-          <button
-            onClick={handleAddMoney}
-            className="bg-green-600 text-white px-6 rounded-lg hover:bg-green-700"
-          >
-            Add Money
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* SEND MONEY */}
-
-      <div className="bg-white p-6 rounded-2xl shadow mt-8">
-
-        <h2 className="text-xl font-bold">
-          Send Money 💸
-        </h2>
-
-        <div className="flex flex-col gap-4 mt-4">
-
-          <input
-            type="email"
-            placeholder="Recipient Email"
-            value={recipientEmail}
-            onChange={(e) =>
-              setRecipientEmail(
-                e.target.value
-              )
-            }
-            className="border p-3 rounded-lg"
-          />
-
-          <input
-            type="number"
-            placeholder="Enter amount"
-            value={sendMoneyAmount}
-            onChange={(e) =>
-              setSendMoneyAmount(
-                e.target.value
-              )
-            }
-            className="border p-3 rounded-lg"
-          />
-
-          <button
-            onClick={handleSendMoney}
-            className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
-          >
-            Send Money
-          </button>
-
-        </div>
-
-      </div>
-
-      {/* MESSAGE */}
-
-      {message && (
-
-        <div className="bg-white p-4 rounded-2xl shadow mt-8">
-
-          <p className="font-semibold">
-            {message}
-          </p>
-
-        </div>
-
-      )}
-
-      {/* TRANSACTIONS */}
-
-      <div className="bg-white p-6 rounded-2xl shadow mt-8">
-
-        <h2 className="text-xl font-bold">
-          Recent Transactions
-        </h2>
-
-        {transactions.length === 0 ? (
-
-          <p className="mt-4 text-gray-600">
-            No transactions yet.
-          </p>
-
-        ) : (
-
-          <div className="mt-4 space-y-3">
-
-            {transactions.map(
-              (transaction) => (
-
-                <div
-                  key={transaction.id}
-                  className="flex justify-between items-center border-b pb-3"
-                >
-
-                  <div>
-
-                    <p className="font-semibold">
-                      {transaction.description}
-                    </p>
-
-                    <p className="text-sm text-gray-500">
-                      {new Date(
-                        transaction.createdAt
-                      ).toLocaleString()}
-                    </p>
-
-                  </div>
-
-                  <p
-                    className={
-                      transaction.type ===
-                      "CREDIT"
-                        ? "font-bold text-green-600"
-                        : "font-bold text-red-600"
-                    }
-                  >
-
-                    {transaction.type ===
-                    "CREDIT"
-                      ? "+"
-                      : "-"}{" "}
-
-                    ₹
-                    {transaction.amount.toLocaleString(
-                      "en-IN"
-                    )}
-
-                  </p>
-
-                </div>
-
-              )
-            )}
-
-          </div>
-
-        )}
-
-      </div>
-
-    </div>
-  );
-}
-
-export default Dashboard;
+                <p
