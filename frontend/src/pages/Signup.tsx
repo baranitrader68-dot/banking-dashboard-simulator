@@ -13,7 +13,7 @@ function Signup({ onLogin }: { onLogin: () => void }) {
 
     try {
       const response = await fetch(
-        "https://banking-dashboard-simulator.onrender.com/api/auth/signup",
+        "https://banking-dashboard-simulator.onrender.com/api/auth/register",
         {
           method: "POST",
 
@@ -73,7 +73,6 @@ function Signup({ onLogin }: { onLogin: () => void }) {
           className="mt-6 space-y-4"
         >
 
-          {/* Full Name */}
           <input
             type="text"
             placeholder="Full Name"
@@ -85,7 +84,6 @@ function Signup({ onLogin }: { onLogin: () => void }) {
             className="w-full rounded-lg border p-3 outline-none focus:border-blue-500"
           />
 
-          {/* Email */}
           <input
             type="email"
             placeholder="Email"
@@ -97,7 +95,6 @@ function Signup({ onLogin }: { onLogin: () => void }) {
             className="w-full rounded-lg border p-3 outline-none focus:border-blue-500"
           />
 
-          {/* Password */}
           <input
             type="password"
             placeholder="Password"
@@ -110,7 +107,6 @@ function Signup({ onLogin }: { onLogin: () => void }) {
             className="w-full rounded-lg border p-3 outline-none focus:border-blue-500"
           />
 
-          {/* Sign Up Button */}
           <button
             type="submit"
             className="w-full rounded-lg bg-blue-600 p-3 text-white hover:bg-blue-700"
@@ -120,14 +116,12 @@ function Signup({ onLogin }: { onLogin: () => void }) {
 
         </form>
 
-        {/* Message */}
         {message && (
           <p className="mt-4 text-center font-semibold">
             {message}
           </p>
         )}
 
-        {/* Login */}
         <p className="mt-6 text-center text-gray-600">
           Already have an account?{" "}
 
