@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 
 import prisma from "../lib/prisma";
 
-// ==================== SIGNUP ====================
+// ==================== SIGNUP / REGISTER ====================
 
 export const registerUser = async (
   req: Request,
@@ -60,8 +60,7 @@ export const registerUser = async (
       });
 
     return res.status(201).json({
-      message:
-        "User registration successful",
+      message: "User registration successful",
 
       user: {
         id: user.id,
@@ -70,23 +69,19 @@ export const registerUser = async (
       },
 
       account: {
-        balance:
-          user.account?.balance,
-
-        currency:
-          user.account?.currency,
+        balance: user.account?.balance,
+        currency: user.account?.currency,
       },
     });
-
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("SIGNUP ERROR:", error);
 
     return res.status(500).json({
-      message: "Something went wrong",
+      message: error.message || "Something went wrong",
+      error: error.code || error,
     });
   }
 };
-
 
 // ==================== LOGIN ====================
 
@@ -102,8 +97,7 @@ export const loginUser = async (
 
     if (!email || !password) {
       return res.status(400).json({
-        message:
-          "Email and password are required",
+        message: "Email and password are required",
       });
     }
 
@@ -120,8 +114,7 @@ export const loginUser = async (
 
     if (!user) {
       return res.status(401).json({
-        message:
-          "Invalid email or password",
+        message: "Invalid email or password",
       });
     }
 
@@ -133,8 +126,7 @@ export const loginUser = async (
 
     if (!isPasswordCorrect) {
       return res.status(401).json({
-        message:
-          "Invalid email or password",
+        message: "Invalid email or password",
       });
     }
 
@@ -162,19 +154,16 @@ export const loginUser = async (
       },
 
       account: {
-        balance:
-          user.account?.balance,
-
-        currency:
-          user.account?.currency,
+        balance: user.account?.balance,
+        currency: user.account?.currency,
       },
     });
-
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error("LOGIN ERROR:", error);
 
     return res.status(500).json({
-      message: "Something went wrong",
+      message: error.message || "Something went wrong",
+      error: error.code || error,
     });
   }
 };
