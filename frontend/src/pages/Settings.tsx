@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Save, User, Mail } from "lucide-react";
 
 const API_URL =
   "https://banking-dashboard-simulator.onrender.com";
@@ -12,8 +11,6 @@ interface UserData {
 }
 
 const Settings = () => {
-  const [user, setUser] = useState<UserData | null>(null);
-
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
 
@@ -39,19 +36,23 @@ const Settings = () => {
         `${API_URL}/api/user/${userId}`
       );
 
-      const data = await response.json();
+      const data: UserData | { message: string } =
+        await response.json();
 
       if (!response.ok) {
         setMessage(
-          data.message || "Failed to load user"
+          "message" in data
+            ? data.message
+            : "Failed to load user"
         );
         setLoading(false);
         return;
       }
 
-      setUser(data);
-      setName(data.name || "");
-      setEmail(data.email || "");
+      if ("name" in data && "email" in data) {
+        setName(data.name || "");
+        setEmail(data.email || "");
+      }
 
       setLoading(false);
     } catch (error) {
@@ -95,8 +96,6 @@ const Settings = () => {
         return;
       }
 
-      setUser(data.user);
-
       setMessage(
         "Profile updated successfully ✅"
       );
@@ -139,85 +138,53 @@ const Settings = () => {
 
         <div className="rounded-2xl bg-white p-6 shadow-md">
 
-          <div className="mb-6 flex items-center gap-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-blue-600 text-white">
-              <User size={32} />
-            </div>
+          <h2 className="mb-6 text-xl font-semibold text-gray-800">
+            Profile Information
+          </h2>
 
-            <div>
-              <h2 className="text-xl font-semibold text-gray-800">
-                Profile Information
-              </h2>
-
-              <p className="text-gray-500">
-                Update your name and email
-              </p>
-            </div>
-          </div>
-
-          {/* Name */}
           <div className="mb-5">
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Full Name
             </label>
 
-            <div className="relative">
-              <User
-                size={20}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-
-              <input
-                type="text"
-                value={name}
-                onChange={(e) =>
-                  setName(e.target.value)
-                }
-                className="w-full rounded-lg border border-gray-300 py-3 pl-11 pr-4 outline-none focus:border-blue-500"
-                placeholder="Enter your name"
-              />
-            </div>
+            <input
+              type="text"
+              value={name}
+              onChange={(e) =>
+                setName(e.target.value)
+              }
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+              placeholder="Enter your name"
+            />
           </div>
 
-          {/* Email */}
           <div className="mb-6">
             <label className="mb-2 block text-sm font-medium text-gray-700">
               Email Address
             </label>
 
-            <div className="relative">
-              <Mail
-                size={20}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-
-              <input
-                type="email"
-                value={email}
-                onChange={(e) =>
-                  setEmail(e.target.value)
-                }
-                className="w-full rounded-lg border border-gray-300 py-3 pl-11 pr-4 outline-none focus:border-blue-500"
-                placeholder="Enter your email"
-              />
-            </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+              placeholder="Enter your email"
+            />
           </div>
 
-          {/* Message */}
           {message && (
             <div className="mb-5 rounded-lg bg-blue-50 p-3 text-blue-700">
               {message}
             </div>
           )}
 
-          {/* Save */}
           <button
             onClick={handleSave}
             disabled={saving}
-            className="flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            className="rounded-lg bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
           >
-            <Save size={20} />
-
             {saving
               ? "Saving..."
               : "Save Changes"}
