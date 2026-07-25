@@ -28,14 +28,17 @@ function Login({
 
     try {
       setLoading(true);
+      setMessage("");
 
       const response = await fetch(
-        "http://localhost:5000/api/auth/login",
+        "https://banking-dashboard-simulator.onrender.com/api/auth/login",
         {
           method: "POST",
+
           headers: {
             "Content-Type": "application/json",
           },
+
           body: JSON.stringify({
             email,
             password,
@@ -72,6 +75,8 @@ function Login({
         );
       }
     } catch (error) {
+      console.error(error);
+
       setMessage(
         "Server connection failed ❌"
       );
@@ -82,7 +87,6 @@ function Login({
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-
       <div className="bg-white w-full max-w-md p-8 rounded-2xl shadow-lg">
 
         <h1 className="text-3xl font-bold text-center text-blue-600">
@@ -149,7 +153,6 @@ function Login({
         </p>
 
       </div>
-
     </div>
   );
 }
