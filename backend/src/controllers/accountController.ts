@@ -12,18 +12,17 @@ export const getAccountBalance = async (
   try {
     const userId = Number(req.params.userId);
 
-    if (!userId) {
+    if (!userId || Number.isNaN(userId)) {
       return res.status(400).json({
         message: "Invalid user ID",
       });
     }
 
-    const account =
-      await prisma.account.findUnique({
-        where: {
-          userId,
-        },
-      });
+    const account = await prisma.account.findUnique({
+      where: {
+        userId,
+      },
+    });
 
     if (!account) {
       return res.status(404).json({
@@ -33,21 +32,16 @@ export const getAccountBalance = async (
 
     return res.status(200).json({
       balance: Number(account.balance),
-      currency: account.currency,
+      currency: account.currency || "INR",
     });
-
   } catch (error) {
-    console.error(
-      "GET ACCOUNT BALANCE ERROR:",
-      error
-    );
+    console.error("GET BALANCE ERROR:", error);
 
     return res.status(500).json({
       message: "Something went wrong",
     });
   }
 };
-
 
 // =========================
 // ADD MONEY
@@ -59,14 +53,7 @@ export const addMoney = async (
 ) => {
   try {
     const userId = Number(req.params.userId);
-
     const amount = Number(req.body.amount);
-
-    if (!userId) {
-      return res.status(400).json({
-        message: "Invalid user ID",
-      });
-    }
 
     if (!amount || amount <= 0) {
       return res.status(400).json({
@@ -74,12 +61,11 @@ export const addMoney = async (
       });
     }
 
-    const account =
-      await prisma.account.findUnique({
-        where: {
-          userId,
-        },
-      });
+    const account = await prisma.account.findUnique({
+      where: {
+        userId,
+      },
+    });
 
     if (!account) {
       return res.status(404).json({
@@ -87,51 +73,39 @@ export const addMoney = async (
       });
     }
 
-    const updatedAccount =
-      await prisma.account.update({
-        where: {
-          userId,
+    const updatedAccount = await prisma.account.update({
+      where: {
+        userId,
+      },
+
+      data: {
+        balance: {
+          increment: amount,
         },
 
-        data: {
-          balance: {
-            increment: amount,
-          },
-
-          transactions: {
-            create: {
-              type: "CREDIT",
-              amount,
-              description: "Money added",
-            },
+        transactions: {
+          create: {
+            type: "CREDIT",
+            amount,
+            description: "Money added",
           },
         },
-      });
-
-    return res.status(200).json({
-      message:
-        "Money added successfully",
-
-      balance: Number(
-        updatedAccount.balance
-      ),
-
-      currency:
-        updatedAccount.currency,
+      },
     });
 
+    return res.status(200).json({
+      message: "Money added successfully",
+      balance: Number(updatedAccount.balance),
+      currency: updatedAccount.currency,
+    });
   } catch (error) {
-    console.error(
-      "ADD MONEY ERROR:",
-      error
-    );
+    console.error("ADD MONEY ERROR:", error);
 
     return res.status(500).json({
       message: "Something went wrong",
     });
   }
 };
-
 
 // =========================
 // GET TRANSACTIONS
@@ -144,18 +118,11 @@ export const getTransactions = async (
   try {
     const userId = Number(req.params.userId);
 
-    if (!userId) {
-      return res.status(400).json({
-        message: "Invalid user ID",
-      });
-    }
-
-    const account =
-      await prisma.account.findUnique({
-        where: {
-          userId,
-        },
-      });
+    const account = await prisma.account.findUnique({
+      where: {
+        userId,
+      },
+    });
 
     if (!account) {
       return res.status(404).json({
@@ -174,41 +141,20 @@ export const getTransactions = async (
         },
       });
 
-    const formattedTransactions =
-      transactions.map(
-        (transaction) => ({
-          id: transaction.id,
-
-          type: transaction.type,
-
-          amount: Number(
-            transaction.amount
-          ),
-
-          description:
-            transaction.description,
-
-          createdAt:
-            transaction.createdAt,
-        })
-      );
-
     return res.status(200).json(
-      formattedTransactions
+      transactions.map((transaction) => ({
+        ...transaction,
+        amount: Number(transaction.amount),
+      }))
     );
-
   } catch (error) {
-    console.error(
-      "GET TRANSACTIONS ERROR:",
-      error
-    );
+    console.error("GET TRANSACTIONS ERROR:", error);
 
     return res.status(500).json({
       message: "Something went wrong",
     });
   }
 };
-
 
 // =========================
 // SEND MONEY
@@ -219,146 +165,9 @@ export const sendMoney = async (
   res: Response
 ) => {
   try {
-    const senderId = Number(
-      req.params.userId
-    );
+    const senderId = Number(req.params.userId);
 
     const {
       recipientEmail,
       amount,
-    } = req.body;
-
-    const money = Number(amount);
-
-    if (!senderId) {
-      return res.status(400).json({
-        message: "Invalid sender ID",
-      });
-    }
-
-    if (
-      !recipientEmail ||
-      !money ||
-      money <= 0
-    ) {
-      return res.status(400).json({
-        message:
-          "Recipient email and valid amount are required",
-      });
-    }
-
-    const sender =
-      await prisma.user.findUnique({
-        where: {
-          id: senderId,
-        },
-
-        include: {
-          account: true,
-        },
-      });
-
-    const recipient =
-      await prisma.user.findUnique({
-        where: {
-          email: recipientEmail,
-        },
-
-        include: {
-          account: true,
-        },
-      });
-
-    if (
-      !sender ||
-      !sender.account
-    ) {
-      return res.status(404).json({
-        message:
-          "Sender account not found",
-      });
-    }
-
-    if (
-      !recipient ||
-      !recipient.account
-    ) {
-      return res.status(404).json({
-        message:
-          "Recipient not found",
-      });
-    }
-
-    if (
-      sender.account.balance < money
-    ) {
-      return res.status(400).json({
-        message:
-          "Insufficient balance",
-      });
-    }
-
-    await prisma.$transaction([
-      prisma.account.update({
-        where: {
-          id: sender.account.id,
-        },
-
-        data: {
-          balance: {
-            decrement: money,
-          },
-
-          transactions: {
-            create: {
-              type: "DEBIT",
-
-              amount: money,
-
-              description:
-                `Money sent to ${recipient.email}`,
-            },
-          },
-        },
-      }),
-
-      prisma.account.update({
-        where: {
-          id: recipient.account.id,
-        },
-
-        data: {
-          balance: {
-            increment: money,
-          },
-
-          transactions: {
-            create: {
-              type: "CREDIT",
-
-              amount: money,
-
-              description:
-                `Money received from ${sender.email}`,
-            },
-          },
-        },
-      }),
-    ]);
-
-    return res.status(200).json({
-      message:
-        "Money transferred successfully",
-    });
-
-  } catch (error) {
-    console.error(
-      "SEND MONEY ERROR:",
-      error
-    );
-
-    return res.status(500).json({
-      message: "Something went wrong",
-    });
-  }
-};
+    } = req.body

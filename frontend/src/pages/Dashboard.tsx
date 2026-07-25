@@ -38,7 +38,7 @@ type Notification = {
 
 function Dashboard() {
   // =========================
-  // GET LOGGED-IN USER
+  // GET USER
   // =========================
 
   const storedUser = localStorage.getItem("user");
@@ -56,7 +56,7 @@ function Dashboard() {
   // =========================
 
   const [balance, setBalance] =
-    useState<number>(0);
+    useState<number | null>(null);
 
   const [currency, setCurrency] =
     useState("INR");
@@ -125,30 +125,35 @@ function Dashboard() {
       const data = await response.json();
 
       console.log(
-        "ACCOUNT API RESPONSE:",
+        "ACCOUNT BALANCE RESPONSE:",
         data
       );
 
       if (response.ok) {
         setBalance(
-          Number(
-            data.balance ??
-              data.account?.balance ??
-              0
-          )
+          Number(data.balance ?? 0)
         );
 
         setCurrency(
-          data.currency ??
-            data.account?.currency ??
-            "INR"
+          data.currency ?? "INR"
         );
+      } else {
+        console.error(
+          "Balance API error:",
+          data
+        );
+
+        setBalance(0);
       }
+
     } catch (error) {
       console.error(
         "Failed to fetch balance",
         error
       );
+
+      setBalance(0);
+
     } finally {
       setLoading(false);
     }
@@ -203,6 +208,7 @@ function Dashboard() {
         setIncome(totalIncome);
         setExpenses(totalExpenses);
       }
+
     } catch (error) {
       console.error(
         "Failed to fetch transactions",
@@ -229,6 +235,7 @@ function Dashboard() {
       if (response.ok) {
         setCard(data);
       }
+
     } catch (error) {
       console.error(
         "Failed to fetch card",
@@ -255,6 +262,7 @@ function Dashboard() {
       if (response.ok) {
         setBudgets(data);
       }
+
     } catch (error) {
       console.error(
         "Failed to fetch budgets",
@@ -281,6 +289,7 @@ function Dashboard() {
       if (response.ok) {
         setNotifications(data);
       }
+
     } catch (error) {
       console.error(
         "Failed to fetch notifications",
@@ -320,6 +329,7 @@ function Dashboard() {
             )
         );
       }
+
     } catch (error) {
       console.error(
         "Failed to mark notification as read",
@@ -343,6 +353,7 @@ function Dashboard() {
     fetchCard();
     fetchBudgets();
     fetchNotifications();
+
   }, [userId, token]);
 
   // =========================
@@ -350,12 +361,15 @@ function Dashboard() {
   // =========================
 
   const handleAddMoney = async () => {
-    const money = Number(addMoneyAmount);
+    const money = Number(
+      addMoneyAmount
+    );
 
     if (!money || money <= 0) {
       setMessage(
         "Please enter a valid amount ❌"
       );
+
       return;
     }
 
@@ -375,11 +389,7 @@ function Dashboard() {
 
       if (response.ok) {
         setBalance(
-          Number(
-            data.balance ??
-              data.account?.balance ??
-              balance + money
-          )
+          Number(data.balance ?? 0)
         );
 
         setAddMoneyAmount("");
@@ -388,18 +398,17 @@ function Dashboard() {
           "Money added successfully! 🎉"
         );
 
-        fetchAccountBalance();
         fetchTransactions();
         fetchNotifications();
+
       } else {
         setMessage(
           data.message ||
             "Failed to add money ❌"
         );
       }
-    } catch (error) {
-      console.error(error);
 
+    } catch (error) {
       setMessage(
         "Server connection failed ❌"
       );
@@ -411,12 +420,15 @@ function Dashboard() {
   // =========================
 
   const handleSendMoney = async () => {
-    const money = Number(sendMoneyAmount);
+    const money = Number(
+      sendMoneyAmount
+    );
 
     if (!recipientEmail) {
       setMessage(
         "Please enter recipient email ❌"
       );
+
       return;
     }
 
@@ -424,6 +436,7 @@ function Dashboard() {
       setMessage(
         "Please enter a valid amount ❌"
       );
+
       return;
     }
 
@@ -444,7 +457,6 @@ function Dashboard() {
 
       if (response.ok) {
         setSendMoneyAmount("");
-
         setRecipientEmail("");
 
         setMessage(
@@ -454,15 +466,15 @@ function Dashboard() {
         fetchAccountBalance();
         fetchTransactions();
         fetchNotifications();
+
       } else {
         setMessage(
           data.message ||
             "Money transfer failed ❌"
         );
       }
-    } catch (error) {
-      console.error(error);
 
+    } catch (error) {
       setMessage(
         "Server connection failed ❌"
       );
@@ -486,22 +498,22 @@ function Dashboard() {
       const data = await response.json();
 
       if (response.ok) {
-        setCard(data.card ?? data);
+        setCard(data.card);
 
         setMessage(
           "Virtual card created successfully! 💳🎉"
         );
 
         fetchNotifications();
+
       } else {
         setMessage(
           data.message ||
             "Failed to create card ❌"
         );
       }
-    } catch (error) {
-      console.error(error);
 
+    } catch (error) {
       setMessage(
         "Server connection failed ❌"
       );
@@ -513,12 +525,15 @@ function Dashboard() {
   // =========================
 
   const handleCreateBudget = async () => {
-    const money = Number(budgetAmount);
+    const money = Number(
+      budgetAmount
+    );
 
     if (!budgetCategory) {
       setMessage(
         "Please enter budget category ❌"
       );
+
       return;
     }
 
@@ -526,6 +541,7 @@ function Dashboard() {
       setMessage(
         "Please enter a valid budget amount ❌"
       );
+
       return;
     }
 
@@ -546,7 +562,6 @@ function Dashboard() {
 
       if (response.ok) {
         setBudgetCategory("");
-
         setBudgetAmount("");
 
         setMessage(
@@ -555,15 +570,15 @@ function Dashboard() {
 
         fetchBudgets();
         fetchNotifications();
+
       } else {
         setMessage(
           data.message ||
             "Failed to create budget ❌"
         );
       }
-    } catch (error) {
-      console.error(error);
 
+    } catch (error) {
       setMessage(
         "Server connection failed ❌"
       );
@@ -601,6 +616,8 @@ function Dashboard() {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
 
+        {/* BALANCE */}
+
         <div className="bg-white p-6 rounded-2xl shadow">
 
           <p className="text-gray-500">
@@ -608,11 +625,15 @@ function Dashboard() {
           </p>
 
           <h2 className="text-3xl font-bold mt-2">
+
             {loading
               ? "Loading..."
-              : `₹${balance.toLocaleString(
+              : `₹${(
+                  balance ?? 0
+                ).toLocaleString(
                   "en-IN"
                 )}`}
+
           </h2>
 
           <p className="text-sm text-gray-400 mt-2">
@@ -621,6 +642,8 @@ function Dashboard() {
 
         </div>
 
+        {/* INCOME */}
+
         <div className="bg-white p-6 rounded-2xl shadow">
 
           <p className="text-gray-500">
@@ -628,10 +651,15 @@ function Dashboard() {
           </p>
 
           <h2 className="text-3xl font-bold mt-2">
-            ₹{income.toLocaleString("en-IN")}
+            ₹
+            {income.toLocaleString(
+              "en-IN"
+            )}
           </h2>
 
         </div>
+
+        {/* EXPENSES */}
 
         <div className="bg-white p-6 rounded-2xl shadow">
 
@@ -640,7 +668,10 @@ function Dashboard() {
           </p>
 
           <h2 className="text-3xl font-bold mt-2">
-            ₹{expenses.toLocaleString("en-IN")}
+            ₹
+            {expenses.toLocaleString(
+              "en-IN"
+            )}
           </h2>
 
         </div>
@@ -690,4 +721,434 @@ function Dashboard() {
               </div>
 
               <div>
-                <p
+                <p className="text-xs text-gray-400">
+                  CVV
+                </p>
+
+                <p className="font-semibold">
+                  {card.cvv}
+                </p>
+              </div>
+
+            </div>
+
+            <p className="mt-6 text-green-400 font-semibold">
+              ● {card.status}
+            </p>
+
+          </div>
+
+        ) : (
+
+          <div className="mt-4">
+
+            <p className="text-gray-600 mb-4">
+              You don't have a virtual card yet.
+            </p>
+
+            <button
+              onClick={handleCreateCard}
+              className="bg-purple-600 text-white px-6 py-3 rounded-lg hover:bg-purple-700"
+            >
+              Create Virtual Card 💳
+            </button>
+
+          </div>
+
+        )}
+
+      </div>
+
+      {/* BUDGET */}
+
+      <div className="bg-white p-6 rounded-2xl shadow mt-8">
+
+        <h2 className="text-xl font-bold">
+          Budget Planner 🎯
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+
+          <input
+            type="text"
+            placeholder="Category (Food, Travel...)"
+            value={budgetCategory}
+            onChange={(e) =>
+              setBudgetCategory(
+                e.target.value
+              )
+            }
+            className="border p-3 rounded-lg"
+          />
+
+          <input
+            type="number"
+            placeholder="Budget Amount"
+            value={budgetAmount}
+            onChange={(e) =>
+              setBudgetAmount(
+                e.target.value
+              )
+            }
+            className="border p-3 rounded-lg"
+          />
+
+          <button
+            onClick={handleCreateBudget}
+            className="bg-orange-500 text-white p-3 rounded-lg hover:bg-orange-600"
+          >
+            Create Budget 🎯
+          </button>
+
+        </div>
+
+        <div className="mt-6 space-y-4">
+
+          {budgets.length === 0 ? (
+
+            <p className="text-gray-600">
+              No budgets created yet.
+            </p>
+
+          ) : (
+
+            budgets.map((budget) => {
+
+              const percentage =
+                budget.amount > 0
+                  ? (budget.spent /
+                      budget.amount) *
+                    100
+                  : 0;
+
+              return (
+
+                <div
+                  key={budget.id}
+                  className="border p-4 rounded-xl"
+                >
+
+                  <div className="flex justify-between">
+
+                    <p className="font-semibold">
+                      {budget.category}
+                    </p>
+
+                    <p className="font-semibold">
+
+                      ₹
+                      {Number(
+                        budget.spent
+                      ).toLocaleString(
+                        "en-IN"
+                      )}
+
+                      {" / "}
+
+                      ₹
+                      {Number(
+                        budget.amount
+                      ).toLocaleString(
+                        "en-IN"
+                      )}
+
+                    </p>
+
+                  </div>
+
+                  <div className="w-full bg-gray-200 rounded-full h-3 mt-3">
+
+                    <div
+                      className="bg-orange-500 h-3 rounded-full"
+                      style={{
+                        width: `${Math.min(
+                          percentage,
+                          100
+                        )}%`,
+                      }}
+                    />
+
+                  </div>
+
+                  <p className="text-sm text-gray-500 mt-2">
+                    {percentage.toFixed(0)}% used
+                  </p>
+
+                </div>
+
+              );
+
+            })
+
+          )}
+
+        </div>
+
+      </div>
+
+      {/* NOTIFICATIONS */}
+
+      <div className="bg-white p-6 rounded-2xl shadow mt-8">
+
+        <div className="flex justify-between items-center">
+
+          <h2 className="text-xl font-bold">
+            Notifications 🔔
+          </h2>
+
+          <span className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">
+
+            {
+              notifications.filter(
+                (notification) =>
+                  !notification.isRead
+              ).length
+            }{" "}
+
+            Unread
+
+          </span>
+
+        </div>
+
+        {notifications.length === 0 ? (
+
+          <p className="mt-4 text-gray-600">
+            No notifications yet.
+          </p>
+
+        ) : (
+
+          <div className="mt-4 space-y-3">
+
+            {notifications.map(
+              (notification) => (
+
+                <div
+                  key={notification.id}
+                  className={`p-4 rounded-xl border ${
+                    notification.isRead
+                      ? "bg-gray-50"
+                      : "bg-blue-50 border-blue-200"
+                  }`}
+                >
+
+                  <div className="flex justify-between gap-4">
+
+                    <div>
+
+                      <p className="font-semibold">
+                        {notification.title}
+                      </p>
+
+                      <p className="text-gray-600 mt-1">
+                        {notification.message}
+                      </p>
+
+                      <p className="text-sm text-gray-400 mt-2">
+                        {new Date(
+                          notification.createdAt
+                        ).toLocaleString()}
+                      </p>
+
+                    </div>
+
+                    {!notification.isRead && (
+
+                      <button
+                        onClick={() =>
+                          markAsRead(
+                            notification.id
+                          )
+                        }
+                        className="text-sm bg-blue-600 text-white px-3 py-2 rounded-lg h-fit hover:bg-blue-700"
+                      >
+                        Mark as Read
+                      </button>
+
+                    )}
+
+                  </div>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+        )}
+
+      </div>
+
+      {/* ADD MONEY */}
+
+      <div className="bg-white p-6 rounded-2xl shadow mt-8">
+
+        <h2 className="text-xl font-bold">
+          Add Money 💰
+        </h2>
+
+        <div className="flex gap-4 mt-4">
+
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={addMoneyAmount}
+            onChange={(e) =>
+              setAddMoneyAmount(
+                e.target.value
+              )
+            }
+            className="border p-3 rounded-lg flex-1"
+          />
+
+          <button
+            onClick={handleAddMoney}
+            className="bg-green-600 text-white px-6 rounded-lg hover:bg-green-700"
+          >
+            Add Money
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* SEND MONEY */}
+
+      <div className="bg-white p-6 rounded-2xl shadow mt-8">
+
+        <h2 className="text-xl font-bold">
+          Send Money 💸
+        </h2>
+
+        <div className="flex flex-col gap-4 mt-4">
+
+          <input
+            type="email"
+            placeholder="Recipient Email"
+            value={recipientEmail}
+            onChange={(e) =>
+              setRecipientEmail(
+                e.target.value
+              )
+            }
+            className="border p-3 rounded-lg"
+          />
+
+          <input
+            type="number"
+            placeholder="Enter amount"
+            value={sendMoneyAmount}
+            onChange={(e) =>
+              setSendMoneyAmount(
+                e.target.value
+              )
+            }
+            className="border p-3 rounded-lg"
+          />
+
+          <button
+            onClick={handleSendMoney}
+            className="bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700"
+          >
+            Send Money
+          </button>
+
+        </div>
+
+      </div>
+
+      {/* MESSAGE */}
+
+      {message && (
+
+        <div className="bg-white p-4 rounded-2xl shadow mt-8">
+
+          <p className="font-semibold">
+            {message}
+          </p>
+
+        </div>
+
+      )}
+
+      {/* TRANSACTIONS */}
+
+      <div className="bg-white p-6 rounded-2xl shadow mt-8">
+
+        <h2 className="text-xl font-bold">
+          Recent Transactions
+        </h2>
+
+        {transactions.length === 0 ? (
+
+          <p className="mt-4 text-gray-600">
+            No transactions yet.
+          </p>
+
+        ) : (
+
+          <div className="mt-4 space-y-3">
+
+            {transactions.map(
+              (transaction) => (
+
+                <div
+                  key={transaction.id}
+                  className="flex justify-between items-center border-b pb-3"
+                >
+
+                  <div>
+
+                    <p className="font-semibold">
+                      {transaction.description}
+                    </p>
+
+                    <p className="text-sm text-gray-500">
+                      {new Date(
+                        transaction.createdAt
+                      ).toLocaleString()}
+                    </p>
+
+                  </div>
+
+                  <p
+                    className={
+                      transaction.type ===
+                      "CREDIT"
+                        ? "font-bold text-green-600"
+                        : "font-bold text-red-600"
+                    }
+                  >
+
+                    {transaction.type ===
+                    "CREDIT"
+                      ? "+"
+                      : "-"}{" "}
+
+                    ₹
+                    {Number(
+                      transaction.amount
+                    ).toLocaleString(
+                      "en-IN"
+                    )}
+
+                  </p>
+
+                </div>
+
+              )
+            )}
+
+          </div>
+
+        )}
+
+      </div>
+
+    </div>
+  );
+}
+
+export default Dashboard;
