@@ -10,9 +10,13 @@ export const getAccountBalance = async (
   res: Response
 ) => {
   try {
-    const userId = Number(
-      req.params.userId
-    );
+    const userId = Number(req.params.userId);
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
 
     const account =
       await prisma.account.findUnique({
@@ -28,12 +32,15 @@ export const getAccountBalance = async (
     }
 
     return res.status(200).json({
-      balance: account.balance,
+      balance: Number(account.balance),
       currency: account.currency,
     });
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "GET ACCOUNT BALANCE ERROR:",
+      error
+    );
 
     return res.status(500).json({
       message: "Something went wrong",
@@ -51,13 +58,15 @@ export const addMoney = async (
   res: Response
 ) => {
   try {
-    const userId = Number(
-      req.params.userId
-    );
+    const userId = Number(req.params.userId);
 
-    const amount = Number(
-      req.body.amount
-    );
+    const amount = Number(req.body.amount);
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
 
     if (!amount || amount <= 0) {
       return res.status(400).json({
@@ -103,12 +112,19 @@ export const addMoney = async (
       message:
         "Money added successfully",
 
-      balance:
-        updatedAccount.balance,
+      balance: Number(
+        updatedAccount.balance
+      ),
+
+      currency:
+        updatedAccount.currency,
     });
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "ADD MONEY ERROR:",
+      error
+    );
 
     return res.status(500).json({
       message: "Something went wrong",
@@ -126,9 +142,13 @@ export const getTransactions = async (
   res: Response
 ) => {
   try {
-    const userId = Number(
-      req.params.userId
-    );
+    const userId = Number(req.params.userId);
+
+    if (!userId) {
+      return res.status(400).json({
+        message: "Invalid user ID",
+      });
+    }
 
     const account =
       await prisma.account.findUnique({
@@ -154,12 +174,34 @@ export const getTransactions = async (
         },
       });
 
+    const formattedTransactions =
+      transactions.map(
+        (transaction) => ({
+          id: transaction.id,
+
+          type: transaction.type,
+
+          amount: Number(
+            transaction.amount
+          ),
+
+          description:
+            transaction.description,
+
+          createdAt:
+            transaction.createdAt,
+        })
+      );
+
     return res.status(200).json(
-      transactions
+      formattedTransactions
     );
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "GET TRANSACTIONS ERROR:",
+      error
+    );
 
     return res.status(500).json({
       message: "Something went wrong",
@@ -187,6 +229,12 @@ export const sendMoney = async (
     } = req.body;
 
     const money = Number(amount);
+
+    if (!senderId) {
+      return res.status(400).json({
+        message: "Invalid sender ID",
+      });
+    }
 
     if (
       !recipientEmail ||
@@ -264,7 +312,9 @@ export const sendMoney = async (
           transactions: {
             create: {
               type: "DEBIT",
+
               amount: money,
+
               description:
                 `Money sent to ${recipient.email}`,
             },
@@ -285,7 +335,9 @@ export const sendMoney = async (
           transactions: {
             create: {
               type: "CREDIT",
+
               amount: money,
+
               description:
                 `Money received from ${sender.email}`,
             },
@@ -300,7 +352,10 @@ export const sendMoney = async (
     });
 
   } catch (error) {
-    console.error(error);
+    console.error(
+      "SEND MONEY ERROR:",
+      error
+    );
 
     return res.status(500).json({
       message: "Something went wrong",

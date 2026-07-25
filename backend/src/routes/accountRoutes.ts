@@ -9,6 +9,7 @@ import {
 
 const router = express.Router();
 
+
 // =========================
 // GET ACCOUNT BALANCE
 // =========================
@@ -17,6 +18,7 @@ router.get(
   "/:userId",
   getAccountBalance
 );
+
 
 // =========================
 // ADD MONEY
@@ -27,6 +29,7 @@ router.post(
   addMoney
 );
 
+
 // =========================
 // GET TRANSACTIONS
 // =========================
@@ -36,6 +39,7 @@ router.get(
   getTransactions
 );
 
+
 // =========================
 // SEND MONEY
 // =========================
@@ -44,5 +48,6 @@ router.post(
   "/:userId/send-money",
   sendMoney
 );
+
 
 export default router;
