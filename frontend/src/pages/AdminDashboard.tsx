@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+const API_URL =
+  "https://banking-dashboard-simulator.onrender.com";
+
 type AdminStats = {
   totalUsers: number;
   totalAccounts: number;
@@ -22,7 +25,7 @@ function AdminDashboard() {
   const fetchAdminStats = async () => {
     try {
       const response = await fetch(
-        "http://localhost:5000/api/admin/stats"
+        `${API_URL}/api/admin/stats`
       );
 
       const data = await response.json();
@@ -30,9 +33,17 @@ function AdminDashboard() {
       if (response.ok) {
         setStats(data);
       } else {
-        setError(data.message);
+        setError(
+          data.message ||
+            "Failed to load admin dashboard ❌"
+        );
       }
     } catch (error) {
+      console.error(
+        "Admin stats error:",
+        error
+      );
+
       setError(
         "Server connection failed ❌"
       );
@@ -68,8 +79,10 @@ function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-100 p-6">
 
-      {/* Header */}
+      {/* HEADER */}
+
       <div className="mb-8">
+
         <h1 className="text-3xl font-bold text-gray-800">
           Admin Dashboard 🛡️
         </h1>
@@ -77,90 +90,104 @@ function AdminDashboard() {
         <p className="text-gray-600 mt-2">
           Banking Dashboard Administration Panel
         </p>
+
       </div>
 
+      {/* STATISTICS CARDS */}
 
-      {/* Statistics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-        {/* Total Users */}
+        {/* TOTAL USERS */}
+
         <div className="bg-white p-6 rounded-2xl shadow">
+
           <p className="text-gray-500">
             Total Users 👥
           </p>
 
           <h2 className="text-3xl font-bold mt-3 text-blue-600">
-            {stats?.totalUsers}
+            {stats?.totalUsers ?? 0}
           </h2>
+
         </div>
 
+        {/* TOTAL ACCOUNTS */}
 
-        {/* Total Accounts */}
         <div className="bg-white p-6 rounded-2xl shadow">
+
           <p className="text-gray-500">
             Total Accounts 🏦
           </p>
 
           <h2 className="text-3xl font-bold mt-3 text-purple-600">
-            {stats?.totalAccounts}
+            {stats?.totalAccounts ?? 0}
           </h2>
+
         </div>
 
+        {/* TOTAL BALANCE */}
 
-        {/* Total Balance */}
         <div className="bg-white p-6 rounded-2xl shadow">
+
           <p className="text-gray-500">
             Total Bank Balance 💰
           </p>
 
           <h2 className="text-3xl font-bold mt-3 text-green-600">
             ₹
-            {stats?.totalBalance.toLocaleString(
-              "en-IN"
-            )}
+            {(
+              stats?.totalBalance ?? 0
+            ).toLocaleString("en-IN")}
           </h2>
+
         </div>
 
+        {/* TOTAL CARDS */}
 
-        {/* Total Cards */}
         <div className="bg-white p-6 rounded-2xl shadow">
+
           <p className="text-gray-500">
             Total Cards 💳
           </p>
 
           <h2 className="text-3xl font-bold mt-3 text-orange-600">
-            {stats?.totalCards}
+            {stats?.totalCards ?? 0}
           </h2>
+
         </div>
 
+        {/* TOTAL TRANSACTIONS */}
 
-        {/* Total Transactions */}
         <div className="bg-white p-6 rounded-2xl shadow">
+
           <p className="text-gray-500">
             Total Transactions 💸
           </p>
 
           <h2 className="text-3xl font-bold mt-3 text-red-600">
-            {stats?.totalTransactions}
+            {stats?.totalTransactions ?? 0}
           </h2>
+
         </div>
 
+        {/* TOTAL BUDGETS */}
 
-        {/* Total Budgets */}
         <div className="bg-white p-6 rounded-2xl shadow">
+
           <p className="text-gray-500">
             Total Budgets 🎯
           </p>
 
           <h2 className="text-3xl font-bold mt-3 text-pink-600">
-            {stats?.totalBudgets}
+            {stats?.totalBudgets ?? 0}
           </h2>
+
         </div>
 
       </div>
 
+      {/* SYSTEM STATUS */}
 
-      {/* System Status */}
       <div className="bg-white p-6 rounded-2xl shadow mt-8">
 
         <h2 className="text-xl font-bold">
