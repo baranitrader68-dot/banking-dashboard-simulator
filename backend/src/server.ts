@@ -14,18 +14,20 @@ import transferRoutes from "./routes/transferRoutes";
 
 dotenv.config();
 
-const app =
-  express();
+const app = express();
 
 // =========================
 // MIDDLEWARE
 // =========================
 
-app.use(cors());
-
 app.use(
-  express.json()
+  cors({
+    origin: true,
+    credentials: true,
+  })
 );
+
+app.use(express.json());
 
 // =========================
 // ROUTES
@@ -78,7 +80,7 @@ app.use(
 app.get(
   "/",
   (req, res) => {
-    res.json({
+    res.status(200).json({
       message:
         "Banking Dashboard API is running 🚀",
     });
@@ -90,13 +92,14 @@ app.get(
 // =========================
 
 const PORT =
-  5000;
+  Number(process.env.PORT) || 5000;
 
 app.listen(
   PORT,
+  "0.0.0.0",
   () => {
     console.log(
-      `Server running on http://localhost:${PORT}`
+      `Server running on port ${PORT}`
     );
   }
 );

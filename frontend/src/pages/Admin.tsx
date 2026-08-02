@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 
+const API_URL =
+  "https://banking-dashboard-simulator.onrender.com";
+
 type AdminStats = {
   totalUsers: number;
   totalAccounts: number;
@@ -10,24 +13,39 @@ type AdminStats = {
 };
 
 function Admin() {
-  const [stats, setStats] = useState<AdminStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [stats, setStats] =
+    useState<AdminStats | null>(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
 
   const fetchAdminStats = async () => {
     try {
+      setLoading(true);
+      setError("");
+
       const response = await fetch(
-        "http://localhost:5000/api/admin/stats"
+        `${API_URL}/api/admin/stats`
       );
 
       const data = await response.json();
 
       if (response.ok) {
         setStats(data);
+      } else {
+        setError(
+          data.message ||
+            "Failed to load admin dashboard ❌"
+        );
       }
-    } catch (error) {
-      console.error(
-        "Failed to fetch admin stats",
-        error
+    } catch (err) {
+      console.error(err);
+
+      setError(
+        "Failed to load admin dashboard ❌"
       );
     } finally {
       setLoading(false);
@@ -48,12 +66,19 @@ function Admin() {
     );
   }
 
-  if (!stats) {
+  if (error || !stats) {
     return (
       <div className="p-8">
         <p className="text-red-600">
-          Failed to load admin dashboard ❌
+          {error}
         </p>
+
+        <button
+          onClick={fetchAdminStats}
+          className="mt-4 rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+        >
+          Retry 🔄
+        </button>
       </div>
     );
   }
@@ -65,69 +90,72 @@ function Admin() {
         Admin Dashboard 👑
       </h1>
 
-      <p className="text-gray-600 mt-2">
+      <p className="mt-2 text-gray-600">
         Monitor your banking platform.
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+      <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div className="rounded-2xl bg-white p-6 shadow">
           <p className="text-gray-500">
             Total Users 👥
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold">
             {stats.totalUsers}
           </h2>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div className="rounded-2xl bg-white p-6 shadow">
           <p className="text-gray-500">
             Total Accounts 🏦
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold">
             {stats.totalAccounts}
           </h2>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div className="rounded-2xl bg-white p-6 shadow">
           <p className="text-gray-500">
             Total Cards 💳
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold">
             {stats.totalCards}
           </h2>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div className="rounded-2xl bg-white p-6 shadow">
           <p className="text-gray-500">
             Transactions 💸
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold">
             {stats.totalTransactions}
           </h2>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div className="rounded-2xl bg-white p-6 shadow">
           <p className="text-gray-500">
             Total Budgets 🎯
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
+          <h2 className="mt-2 text-3xl font-bold">
             {stats.totalBudgets}
           </h2>
         </div>
 
-        <div className="bg-white p-6 rounded-2xl shadow">
+        <div className="rounded-2xl bg-white p-6 shadow">
           <p className="text-gray-500">
             Total Balance 💰
           </p>
 
-          <h2 className="text-3xl font-bold mt-2">
-            ₹{stats.totalBalance.toLocaleString("en-IN")}
+          <h2 className="mt-2 text-3xl font-bold text-green-600">
+            ₹
+            {stats.totalBalance.toLocaleString(
+              "en-IN"
+            )}
           </h2>
         </div>
 
@@ -135,7 +163,7 @@ function Admin() {
 
       <button
         onClick={fetchAdminStats}
-        className="mt-8 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+        className="mt-8 rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
       >
         Refresh Stats 🔄
       </button>
