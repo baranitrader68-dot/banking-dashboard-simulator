@@ -25,7 +25,7 @@ function Notifications() {
   const fetchNotifications = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/notification/${userId}`
+        `http://https://banking-dashboard-simulator.onrender.com/api/notification/${userId}`
       );
 
       const data =
@@ -62,7 +62,7 @@ function Notifications() {
   ) => {
     try {
       await fetch(
-        `http://localhost:5000/api/notification/${notificationId}/read`,
+        `http://https://banking-dashboard-simulator.onrender.com/api/notification/${notificationId}/read`,
         {
           method: "PATCH",
         }

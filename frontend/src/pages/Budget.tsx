@@ -29,7 +29,7 @@ function Budget() {
   const fetchBudgets = async () => {
     try {
       const response = await fetch(
-        `http://localhost:5000/api/budget/${userId}`
+        `http://https://banking-dashboard-simulator.onrender.com/api/budget/${userId}`
       );
 
       const data =
@@ -71,7 +71,7 @@ function Budget() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/budget/${userId}`,
+        `http://https://banking-dashboard-simulator.onrender.com/api/budget/${userId}`,
         {
           method: "POST",
 

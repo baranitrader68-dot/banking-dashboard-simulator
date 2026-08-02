@@ -30,7 +30,7 @@ function Transactions() {
       setLoading(true);
 
       const response = await fetch(
-        `http://localhost:5000/api/account/${userId}/transactions`
+        `http://https://banking-dashboard-simulator.onrender.com/api/account/${userId}/transactions`
       );
 
       const data =

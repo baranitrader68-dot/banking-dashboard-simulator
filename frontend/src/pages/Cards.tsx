@@ -40,7 +40,7 @@ function Cards() {
         localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/card/${userId}`,
+        `http://https://banking-dashboard-simulator.onrender.com/api/card/${userId}`,
         {
           headers: {
             Authorization:
@@ -91,7 +91,7 @@ function Cards() {
         localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:5000/api/card/${userId}`,
+        `http://https://banking-dashboard-simulator.onrender.com/api/card/${userId}`,
         {
           method: "POST",
 
